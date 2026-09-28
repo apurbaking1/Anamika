@@ -1,0 +1,8 @@
+{
+  "name": "Anamika",
+  "short_name": "Anamika",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#14060c",
+  "theme_color": "#1a0610"
+}

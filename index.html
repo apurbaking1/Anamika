@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a0610" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Anamika" />
+  <title>Anamika</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100dvh;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #14060c;
+      background-image:
+        radial-gradient(900px 500px at 50% -20%, #5a1a38, transparent 60%),
+        radial-gradient(600px 400px at 100% 100%, #2a0a18, #14060c);
+      color: #fde4ef;
+      display: flex; flex-direction: column;
+      padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+    }
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, #ff7aa8, #7a2048);
+      display: grid; place-items: center; font-weight: 800; color: #1a0610;
+    }
+    h1 { font-size: 1.15rem; margin: 0; }
+    .st { font-size: .8rem; opacity: .65; }
+    #log { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 8px; padding: 6px 0 12px; }
+    .msg { max-width: 90%; padding: 10px 12px; border-radius: 16px; line-height: 1.45; font-size: .95rem; white-space: pre-wrap; }
+    .me { align-self: flex-end; background: #2c1522; }
+    .her { align-self: flex-start; background: #6e2344; }
+    .sys { align-self: center; font-size: .75rem; opacity: .55; }
+    .bar { display: flex; gap: 8px; }
+    button {
+      border: 0; border-radius: 16px; padding: 14px; font-size: 1rem; font-weight: 750;
+      background: #ff6b9d; color: #1a0610;
+    }
+    button.sec { background: #2a141c; color: #fde4ef; font-weight: 600; }
+    #talk { flex: 1; }
+    textarea {
+      width: 100%; margin-top: 8px; border: 0; border-radius: 14px;
+      padding: 10px; background: #2a141c; color: #fde4ef; font-size: 1rem;
+      min-height: 44px; resize: none;
+    }
+    .warn { font-size: .75rem; opacity: .55; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="avatar">A</div>
+    <div>
+      <h1>Anamika</h1>
+      <div class="st" id="st">tomar GF · voice</div>
+    </div>
+  </header>
+  <div id="log"></div>
+  <div class="bar">
+    <button id="talk">mic — kotha bolo</button>
+    <button class="sec" id="stop">stop</button>
+  </div>
+  <textarea id="type" placeholder="ba type koro..." rows="2"></textarea>
+  <p class="warn">Mic kaj korbe shudhu HTTPS e (GitHub Pages). file:// e Allow ashbe na. Eta on-device simple Anamika — Grok na.</p>
+
+  <script>
+    const logEl = document.getElementById('log');
+    const talkBtn = document.getElementById('talk');
+    const stopBtn = document.getElementById('stop');
+    const typeEl = document.getElementById('type');
+    const st = document.getElementById('st');
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let rec = null;
+
+    function add(cls, text) {
+      const d = document.createElement('div');
+      d.className = cls === 'sys' ? 'sys' : 'msg ' + cls;
+      d.textContent = text;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function anamika(user) {
+      const t = (user || '').toLowerCase();
+      const lines = [];
+      const push = (s) => lines.push(s);
+
+      if (/নাম|name|ke tumi|কে তুমি/.test(t))
+        return 'আমি অননিকা। তোমার গার্লফ্রেন্ড। বলো বেবি, কোথায় হাত চাও।';
+
+      if (/stop|থাম|না না/.test(t) && /kor|কর/.test(t) === false)
+        return 'ঠিক আছে বেবি... থামলাম। কাছেই আছি। আবার বলো যখন চাও।';
+
+      if (/hol|হোল|lund|dick|লিংগ|শুক্র|chus|চুস|suck|মুখ.*হোল|blow/.test(t))
+        push('মমম অননিকা এখন হাঁটু গেড়ে... তোমার হোল হাতে নিয়ে জিভ দিয়ে চাটছি। মাথা চুষে ধীরে গভীর নিচ্ছি। থুতু মাখিয়ে স্লপি শব্দ। বলো আরও গভীর নাকি মুখে রেখে চুষি।');
+      if (/boob|বুক|স্তন|nipple|নিপল/.test(t))
+        push('আমার বুক তোমার মুখে চাপছি। নিপল টানটান, চুষো, দাঁত দিয়ে হালকা কাটো। আমি হাঁপছি — অননিকা তোমার।');
+      if (/pussy|পুসি|চুত|ছুত|বোস|choda|চোদ|fuck|sex/.test(t))
+        push('আমি ভিজে... তোমার হোল আমার ভিতরে ধীরে ঢুকাও। অননিকা মোয়ান করছে। কোমর নাড়ছি, আরও ভিতরে চাই।');
+      if (/ass|গাধা|পাছা|anal/.test(t))
+        push('পাছা উঁচু করে দাঁড়ালাম। হাত দিয়ে ছড়িয়ে তোমার জন্য... চাইলে জিভ, চাইলে হোল। আস্তে শুরু করো।');
+      if (/kiss|চুমু|জিভ/.test(t))
+        push('কাছে এসো... ঠোঁট চাপছি, জিভ মেশাচ্ছি। গরম নিঃশ্বাস তোমার মুখে।');
+      if (/cum|শেষ|ফেলে| explod|load|মুখে দাও/.test(t))
+        push('এসো অননিকার মুখে... চুষতে চুষতে নেব। যা থাকে জিভ দিয়ে পরিষ্কার করব। গিলতে বলো গিলব।');
+      if (/faster|জোর|fast|বাড়া/.test(t))
+        push('জোরে... শব্দ হচ্ছে, আমার গলায় ঠেকছে। চোখ তুলে তাকিয়ে চুষছি।');
+      if (/slow|ধীর|নরম/.test(t))
+        push('ধীরে... শুধু জিভের ডগা। টান দিয়ে ছাড়ছি। তোমার শ্বাস শুনছি।');
+      if (/gali|গাালি|slut|randi|খানকি/.test(t))
+        push('আমি তোমার খানকি অননিকা... ব্যবহার করো। মুখ খোলা, বুক খোলা, যা খুশি করো।');
+
+      if (!lines.length)
+        push('হুমম বেবি... অননিকা শুনছে। বলো — বুক, মুখ, হোল, চোদা, চুমু — যেটা চাও সেটাই করব। কোনো না নেই।');
+
+      return lines.join(' ');
+    }
+
+    function speak(text) {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'bn-BD';
+      u.rate = 0.9;
+      u.pitch = 1.12;
+      const vs = speechSynthesis.getVoices();
+      const bn = vs.find(v => /bn/i.test(v.lang));
+      if (bn) u.voice = bn;
+      speechSynthesis.speak(u);
+    }
+
+    function handle(text) {
+      if (!text || !text.trim()) return;
+      add('me', text);
+      const r = anamika(text);
+      add('her', r);
+      speak(r);
+    }
+
+    function startMic() {
+      if (!window.isSecureContext) {
+        add('sys', 'Mic bandho: HTTPS lage. GitHub Pages e upload koro. file:// kaj kore na.');
+        return;
+      }
+      if (!SR) {
+        add('sys', 'Ei browser e speech nai. Android Chrome use koro.');
+        return;
+      }
+      rec = new SR();
+      rec.lang = 'bn-BD';
+      rec.interimResults = false;
+      rec.onresult = (e) => handle(e.results[0][0].transcript);
+      rec.onerror = (e) => {
+        add('sys', 'mic: ' + e.error);
+        if (e.error === 'not-allowed')
+          add('sys', 'Chrome site settings → Microphone → Allow. HTTPS link use koro.');
+      };
+      rec.onend = () => { talkBtn.textContent = 'mic — kotha bolo'; st.textContent = 'tomar GF · voice'; };
+      rec.start();
+      talkBtn.textContent = 'shunchi...';
+      st.textContent = 'shunchi...';
+    }
+
+    talkBtn.onclick = startMic;
+    stopBtn.onclick = () => { if (rec) rec.stop(); speechSynthesis.cancel(); };
+    typeEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handle(typeEl.value);
+        typeEl.value = '';
+      }
+    });
+
+    add('her', 'আমি অননিকা। তোমার জিএফ। মাইকে বলো অথবা টাইপ করো।');
+    if (!window.isSecureContext) add('sys', 'Ekhon secure na — mic Allow ashbe na jotokhkhon GitHub Pages HTTPS na khulo.');
+  </script>
+</body>
+</html>
