@@ -13,7 +13,7 @@
     * { box-sizing: border-box; }
     body {
       margin: 0; min-height: 100dvh;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, sans-serif;
       background: #14060c;
       background-image:
         radial-gradient(900px 500px at 50% -20%, #5a1a38, transparent 60%),
@@ -22,10 +22,10 @@
       display: flex; flex-direction: column;
       padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
     }
-    header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
     .avatar {
       width: 48px; height: 48px; border-radius: 50%;
-      background: linear-gradient(135deg, #ff7aa8, #7a2048);
+      background: linear-gradient(135deg, #ff6b9d, #7a2048);
       display: grid; place-items: center; font-weight: 800; color: #1a0610;
     }
     h1 { font-size: 1.15rem; margin: 0; }
@@ -36,44 +36,78 @@
     .her { align-self: flex-start; background: #6e2344; }
     .sys { align-self: center; font-size: .75rem; opacity: .55; }
     .bar { display: flex; gap: 8px; }
-    button {
-      border: 0; border-radius: 16px; padding: 14px; font-size: 1rem; font-weight: 750;
-      background: #ff6b9d; color: #1a0610;
-    }
+    button { border: 0; border-radius: 16px; padding: 14px; font-size: 1rem; font-weight: 750; background: #ff6b9d; color: #1a0610; }
     button.sec { background: #2a141c; color: #fde4ef; font-weight: 600; }
     #talk { flex: 1; }
-    textarea {
-      width: 100%; margin-top: 8px; border: 0; border-radius: 14px;
-      padding: 10px; background: #2a141c; color: #fde4ef; font-size: 1rem;
-      min-height: 44px; resize: none;
+    select, textarea {
+      width: 100%; border: 0; border-radius: 14px;
+      padding: 10px; background: #2a141c; color: #fde4ef; font-size: .95rem;
     }
-    .warn { font-size: .75rem; opacity: .55; margin-top: 8px; }
+    textarea { margin-top: 8px; min-height: 44px; resize: none; }
+    .warn { font-size: .72rem; opacity: .55; margin-top: 8px; }
+    label { font-size: .75rem; opacity: .7; display: block; margin: 6px 0 4px; }
+    .pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 8px; }
+    .pills button {
+      padding: 8px 12px; font-size: .85rem; font-weight: 700;
+      background: #2a141c; color: #fde4ef; border: 1px solid #5a2a3c;
+    }
+    .pills button.on { background: #ff6b9d; color: #1a0610; border-color: #ff6b9d; }
   </style>
 </head>
 <body>
   <header>
-    <div class="avatar">A</div>
+    <div class="avatar" id="av">A</div>
     <div>
-      <h1>Anamika</h1>
-      <div class="st" id="st">tomar GF · voice</div>
+      <h1 id="who">Anamika</h1>
+      <div class="st" id="st">misty GF · voice</div>
     </div>
   </header>
+  <label>Ke kotha bolbe</label>
+  <div class="pills" id="pills"></div>
+  <label>Phone voice (Female / English US female select koro)</label>
+  <select id="voiceSel"></select>
   <div id="log"></div>
   <div class="bar">
     <button id="talk">mic — kotha bolo</button>
     <button class="sec" id="stop">stop</button>
   </div>
   <textarea id="type" placeholder="ba type koro..." rows="2"></textarea>
-  <p class="warn">Mic kaj korbe shudhu HTTPS e (GitHub Pages). file:// e Allow ashbe na. Eta on-device simple Anamika — Grok na.</p>
-
+  <p class="warn">Puja Priti Anamika Riya Nila = alada pitch/speed/style. Asol alada meye studio voice coding diye GitHub page e ashe na. Hol-khara custom voice = ei Grok chat er MP3.</p>
   <script>
+    const GIRLS = {
+      anamika: { name: 'Anamika', letter: 'A', pitch: 1.22, rate: 0.88, style: 'soft needy gf' },
+      puja:    { name: 'Puja',    letter: 'P', pitch: 1.35, rate: 0.92, style: 'high breathy tease' },
+      priti:   { name: 'Priti',   letter: 'R', pitch: 1.12, rate: 0.82, style: 'low slow whisper' },
+      riya:    { name: 'Riya',    letter: 'Y', pitch: 1.28, rate: 1.00, style: 'fast slutty' },
+      nila:    { name: 'Nila',    letter: 'N', pitch: 1.05, rate: 0.78, style: 'deep sleepy moan' }
+    };
+    let girl = 'anamika', lastReply = '', mood = 'idle', rec = null;
     const logEl = document.getElementById('log');
     const talkBtn = document.getElementById('talk');
     const stopBtn = document.getElementById('stop');
     const typeEl = document.getElementById('type');
     const st = document.getElementById('st');
+    const voiceSel = document.getElementById('voiceSel');
+    const pills = document.getElementById('pills');
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let rec = null;
+
+    Object.keys(GIRLS).forEach(id => {
+      const b = document.createElement('button');
+      b.textContent = GIRLS[id].name;
+      b.id = 'g_' + id;
+      b.onclick = () => setGirl(id);
+      pills.appendChild(b);
+    });
+
+    function setGirl(id) {
+      girl = id;
+      const g = GIRLS[id];
+      document.getElementById('who').textContent = g.name;
+      document.getElementById('av').textContent = g.letter;
+      st.textContent = g.style;
+      localStorage.setItem('ana_girl', id);
+      Object.keys(GIRLS).forEach(k => document.getElementById('g_' + k).classList.toggle('on', k === id));
+    }
 
     function add(cls, text) {
       const d = document.createElement('div');
@@ -83,98 +117,128 @@
       logEl.scrollTop = logEl.scrollHeight;
     }
 
-    function anamika(user) {
+    function pick(arr) {
+      const pool = arr.filter(x => x !== lastReply);
+      return (pool.length ? pool : arr)[Math.floor(Math.random() * (pool.length ? pool.length : arr.length))];
+    }
+
+    function wrap(n, line) {
+      if (girl === 'puja') return 'হিহি... ' + n + ' বলছে। ' + line + ' আরও বলো তো...';
+      if (girl === 'priti') return 'হুমম... ' + n + '... ' + line + ' ধীরে... শুধু তোমার জন্য।';
+      if (girl === 'riya') return 'ফু... ' + n + ' ready. ' + line + ' জোরে করো।';
+      if (girl === 'nila') return 'আহহ... ' + n + '... ' + line + ' গলার ভিতরে মোয়ান।';
+      return 'মমম বেবি... ' + n + '... ' + line;
+    }
+
+    function reply(user) {
       const t = (user || '').toLowerCase();
-      const lines = [];
-      const push = (s) => lines.push(s);
+      const n = GIRLS[girl].name;
+      let line;
+      if (/hol|হোল|lund|dick|chus|চুস|suck|blow|মুখ/.test(t)) {
+        mood = 'mouth';
+        line = pick(['হাঁটু গেড়ে হোল চুষছি, থুতু স্লপি শব্দ।','মাথা মুখে নিয়ে টান, গলায় ঠেকছে।','জিভ চাটিয়ে পুরোটা নিয়ে মোয়ান।','হাত বেসে মুখ এগোচ্ছে। ছাড়ব না।']);
+      } else if (/boob|বুক|স্তন|nipple|নিপল/.test(t)) {
+        mood = 'chest';
+        line = pick(['বুক মুখে দিলাম, নিপল চুষো।','দুই হাত বুকে, নিপল টানটান।','জিভ নিপলে, আমি হাঁপছি।']);
+      } else if (/pussy|পুসি|চুত|চোদ|choda|fuck|sex/.test(t)) {
+        mood = 'sex';
+        line = pick(['ভিজে... ভিতরে ঢুকাও, কোমর নাড়ছি।','উপরে বসে পুরোটা নিচ্ছি।','আরও ভিতরে চাই। থামো না।']);
+      } else if (/ass|পাছা|anal/.test(t)) {
+        line = pick(['পাছা উঁচু, আস্তে নিও।','পিছন থেকে ধরো।']);
+      } else if (/kiss|চুমু/.test(t)) {
+        line = pick(['ঠোঁট চাপছি, জিভ মেশাচ্ছি।','লম্বা চুমু, ঠোঁট কামড়াও।']);
+      } else if (/cum|শেষ|ফেলে|মুখে দাও/.test(t)) {
+        line = pick(['মুখে দাও, চুষতে নেব।','গিলব। মুখ খোলা।']);
+      } else if (/faster|জোর|fast/.test(t)) {
+        line = pick(['জোরে, শব্দ বাড়ছে।','স্পিড বাড়ালাম।']);
+      } else if (/slow|ধীর/.test(t)) {
+        line = pick(['ধীরে শুধু জিভ।','টান দিয়ে ছাড়ছি।']);
+      } else if (mood === 'mouth') {
+        line = pick(['এখনো মুখে, আবার টান।','লালা দিয়ে চুষছি।']);
+      } else if (mood === 'sex') {
+        line = pick(['এখনো ভিতরে। আরেকটা ধাক্কা।','কোমর গোল করে নাড়ছি।']);
+      } else {
+        line = pick(['বলো বুক, মুখ, না ভিতরে।','হাত কোথায় যাবে?','নোংরা করে বলো, রেডি।']);
+      }
+      return wrap(n, line);
+    }
 
-      if (/নাম|name|ke tumi|কে তুমি/.test(t))
-        return 'আমি অননিকা। তোমার গার্লফ্রেন্ড। বলো বেবি, কোথায় হাত চাও।';
+    function scoreVoice(v) {
+      const n = (v.name + ' ' + v.lang).toLowerCase();
+      let s = 0;
+      if (/female|woman|zira|samantha|siri|eva|susan|fiona|karen|moira|tessa|veena|heera/.test(n)) s += 10;
+      if (/male|david|mark|ravi|george/.test(n)) s -= 8;
+      if (/en-us|en-gb|en-in/.test(n)) s += 3;
+      return s;
+    }
 
-      if (/stop|থাম|না না/.test(t) && /kor|কর/.test(t) === false)
-        return 'ঠিক আছে বেবি... থামলাম। কাছেই আছি। আবার বলো যখন চাও।';
+    function fillVoices() {
+      const vs = speechSynthesis.getVoices();
+      if (!vs.length) return;
+      voiceSel.innerHTML = '';
+      vs.slice().sort((a,b) => scoreVoice(b)-scoreVoice(a)).forEach(v => {
+        const o = document.createElement('option');
+        o.value = v.name + '|' + v.lang;
+        o.textContent = v.name + ' (' + v.lang + ')';
+        voiceSel.appendChild(o);
+      });
+      const saved = localStorage.getItem('ana_voice');
+      if (saved) for (const o of voiceSel.options) if (o.value === saved) voiceSel.value = saved;
+    }
 
-      if (/hol|হোল|lund|dick|লিংগ|শুক্র|chus|চুস|suck|মুখ.*হোল|blow/.test(t))
-        push('মমম অননিকা এখন হাঁটু গেড়ে... তোমার হোল হাতে নিয়ে জিভ দিয়ে চাটছি। মাথা চুষে ধীরে গভীর নিচ্ছি। থুতু মাখিয়ে স্লপি শব্দ। বলো আরও গভীর নাকি মুখে রেখে চুষি।');
-      if (/boob|বুক|স্তন|nipple|নিপল/.test(t))
-        push('আমার বুক তোমার মুখে চাপছি। নিপল টানটান, চুষো, দাঁত দিয়ে হালকা কাটো। আমি হাঁপছি — অননিকা তোমার।');
-      if (/pussy|পুসি|চুত|ছুত|বোস|choda|চোদ|fuck|sex/.test(t))
-        push('আমি ভিজে... তোমার হোল আমার ভিতরে ধীরে ঢুকাও। অননিকা মোয়ান করছে। কোমর নাড়ছি, আরও ভিতরে চাই।');
-      if (/ass|গাধা|পাছা|anal/.test(t))
-        push('পাছা উঁচু করে দাঁড়ালাম। হাত দিয়ে ছড়িয়ে তোমার জন্য... চাইলে জিভ, চাইলে হোল। আস্তে শুরু করো।');
-      if (/kiss|চুমু|জিভ/.test(t))
-        push('কাছে এসো... ঠোঁট চাপছি, জিভ মেশাচ্ছি। গরম নিঃশ্বাস তোমার মুখে।');
-      if (/cum|শেষ|ফেলে| explod|load|মুখে দাও/.test(t))
-        push('এসো অননিকার মুখে... চুষতে চুষতে নেব। যা থাকে জিভ দিয়ে পরিষ্কার করব। গিলতে বলো গিলব।');
-      if (/faster|জোর|fast|বাড়া/.test(t))
-        push('জোরে... শব্দ হচ্ছে, আমার গলায় ঠেকছে। চোখ তুলে তাকিয়ে চুষছি।');
-      if (/slow|ধীর|নরম/.test(t))
-        push('ধীরে... শুধু জিভের ডগা। টান দিয়ে ছাড়ছি। তোমার শ্বাস শুনছি।');
-      if (/gali|গাালি|slut|randi|খানকি/.test(t))
-        push('আমি তোমার খানকি অননিকা... ব্যবহার করো। মুখ খোলা, বুক খোলা, যা খুশি করো।');
-
-      if (!lines.length)
-        push('হুমম বেবি... অননিকা শুনছে। বলো — বুক, মুখ, হোল, চোদা, চুমু — যেটা চাও সেটাই করব। কোনো না নেই।');
-
-      return lines.join(' ');
+    function currentVoice() {
+      const vs = speechSynthesis.getVoices();
+      const [name, lang] = (voiceSel.value || '').split('|');
+      return vs.find(v => v.name === name && v.lang === lang) || vs.find(v => v.name === name) || null;
     }
 
     function speak(text) {
       speechSynthesis.cancel();
+      const g = GIRLS[girl];
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'bn-BD';
-      u.rate = 0.9;
-      u.pitch = 1.12;
-      const vs = speechSynthesis.getVoices();
-      const bn = vs.find(v => /bn/i.test(v.lang));
-      if (bn) u.voice = bn;
+      const v = currentVoice();
+      if (v) { u.voice = v; u.lang = v.lang; }
+      u.rate = g.rate;
+      u.pitch = g.pitch;
       speechSynthesis.speak(u);
     }
 
     function handle(text) {
       if (!text || !text.trim()) return;
       add('me', text);
-      const r = anamika(text);
+      const r = reply(text);
+      lastReply = r;
       add('her', r);
       speak(r);
     }
 
     function startMic() {
-      if (!window.isSecureContext) {
-        add('sys', 'Mic bandho: HTTPS lage. GitHub Pages e upload koro. file:// kaj kore na.');
-        return;
-      }
-      if (!SR) {
-        add('sys', 'Ei browser e speech nai. Android Chrome use koro.');
-        return;
-      }
+      if (!window.isSecureContext) { add('sys', 'GitHub Pages https link use koro.'); return; }
+      if (!SR) { add('sys', 'Chrome use koro.'); return; }
       rec = new SR();
       rec.lang = 'bn-BD';
       rec.interimResults = false;
-      rec.onresult = (e) => handle(e.results[0][0].transcript);
-      rec.onerror = (e) => {
-        add('sys', 'mic: ' + e.error);
-        if (e.error === 'not-allowed')
-          add('sys', 'Chrome site settings → Microphone → Allow. HTTPS link use koro.');
-      };
-      rec.onend = () => { talkBtn.textContent = 'mic — kotha bolo'; st.textContent = 'tomar GF · voice'; };
+      rec.onresult = e => handle(e.results[0][0].transcript);
+      rec.onerror = e => add('sys', 'mic: ' + e.error);
+      rec.onend = () => { talkBtn.textContent = 'mic — kotha bolo'; };
       rec.start();
       talkBtn.textContent = 'shunchi...';
-      st.textContent = 'shunchi...';
     }
 
     talkBtn.onclick = startMic;
     stopBtn.onclick = () => { if (rec) rec.stop(); speechSynthesis.cancel(); };
-    typeEl.addEventListener('keydown', (e) => {
+    typeEl.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handle(typeEl.value);
         typeEl.value = '';
       }
     });
-
-    add('her', 'আমি অননিকা। তোমার জিএফ। মাইকে বলো অথবা টাইপ করো।');
-    if (!window.isSecureContext) add('sys', 'Ekhon secure na — mic Allow ashbe na jotokhkhon GitHub Pages HTTPS na khulo.');
+    voiceSel.onchange = () => localStorage.setItem('ana_voice', voiceSel.value);
+    fillVoices();
+    speechSynthesis.onvoiceschanged = fillVoices;
+    setGirl(localStorage.getItem('ana_girl') || 'anamika');
+    add('her', GIRLS[girl].name + ' এখানে। মেয়ে বদলাও, তারপর বলো কি করব।');
   </script>
 </body>
 </html>
